@@ -1,7 +1,8 @@
 from django.utils.translation import ugettext as _
 from django import http
 from django.template.response import TemplateResponse
-from django.template.loader import get_template, find_template
+#AGS:20150816: Django 1.4 to 1.8 migration
+from django.template.loader import get_template
 from django.template.base import TemplateDoesNotExist
 from django.template import RequestContext
 from django.utils.text import capfirst
@@ -96,6 +97,27 @@ class AppAdminSite(AdminSite):
         app_bucket = get_template(bucket_template)
         return app_bucket.render(RequestContext(request, context))
 
+    #AGS:20150816: Removed from django.template.loader since 1.4. 
+    def find_template(name, dirs=None):
+        # Calculate template_source_loaders the first time the function is executed
+        # because putting this logic in the module-level namespace may cause
+        # circular import errors. See Django ticket #1292.
+        global template_source_loaders
+        if template_source_loaders is None:
+            loaders = []
+            for loader_name in settings.TEMPLATE_LOADERS:
+                loader = find_template_loader(loader_name)
+                if loader is not None:
+                    loaders.append(loader)
+            template_source_loaders = tuple(loaders)
+        for loader in template_source_loaders:
+            try:
+                source, display_name = loader(name, dirs)
+                return (source, make_origin(display_name, loader, name, dirs))
+            except TemplateDoesNotExist:
+                pass
+        raise TemplateDoesNotExist(name)
+    
     def _select_index_template(self, app_label):
         templates = [
             'admin/%s/index.html' % app_label,
