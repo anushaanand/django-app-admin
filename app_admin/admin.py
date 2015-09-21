@@ -2,7 +2,7 @@ from django.utils.translation import ugettext as _
 from django import http
 from django.template.response import TemplateResponse
 #AGS:20150816: Django 1.4 to 1.8 migration
-from django.template.loader import get_template
+from django.template.loader import get_template, select_template
 from django.template.base import TemplateDoesNotExist
 from django.template import RequestContext
 from django.utils.text import capfirst
@@ -127,7 +127,7 @@ class AppAdminSite(AdminSite):
 
         for template_name in templates:
             try:
-                find_template(template_name)
+                select_template(template_name)
                 return template_name
             except TemplateDoesNotExist:
                 continue
@@ -142,7 +142,7 @@ class AppAdminSite(AdminSite):
 
         for template_name in templates:
             try:
-                find_template(template_name)
+                select_template(template_name)
                 return template_name
             except TemplateDoesNotExist:
                 continue
