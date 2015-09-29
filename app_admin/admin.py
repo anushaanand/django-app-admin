@@ -160,7 +160,7 @@ class AppAdminSite(AdminSite):
                     # Check whether user has any perm for this module.
                     # If so, add the module to the model_list.
                     if True in perms.values():
-                        info = (app_label, model._meta.module_name)
+                        info = (app_label, model._meta.model_name)
                         model_dict = {
                             'name': capfirst(model._meta.verbose_name_plural),
                             'admin_url': reverse('admin:%s_%s_changelist' % info, current_app=self.name),
